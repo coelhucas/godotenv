@@ -1,24 +1,32 @@
 tool
 extends Node
 
-const AUTOLOAD_NAME: String = "GodotEnv"
-const AUTOLOAD_PATH: String = "res://addons/godotenv/godotenv_funcs.gd"
 const FILE_NAME: String = ".env"
 const FILE_PATH: String = "res://%s" % FILE_NAME
-const UNEXISTING_FILE_ERROR: String = ".env files doesn't exists at %s." % FILE_PATH
-const CREATING_DOTENV_WARNING: String = ".env files doesn't exists. Creating one inside %s..." % FILE_PATH
-const ALREADY_EXISTS_WARNING: String = "A variable called %s already exists, use argument override=true to override it."
+const ERROR_PREFIX: String = "GodotEnv: "
+
+var prompt: Dictionary = {
+	"unexisting_file_error": ".env file doesn't exists at %s." % FILE_PATH,
+	"creating_dotenv_file": ".env file doesn't exists. Creating one at %s..." % FILE_PATH,
+	"already_exists": "A variable called %s already exists, use argument override=true to override it."
+}
 
 var environment: Dictionary = {}
 
 func _ready() -> void:
 	environment = get_parsed_env()
 
+func prompt_message(msg: String, error: bool = false) -> void:
+	if error:
+		push_error(ERROR_PREFIX + msg)
+	else:
+		push_warning(ERROR_PREFIX + msg)
+
 func get_parsed_env() -> Dictionary:
 	var env_variables: Dictionary
 	var dot_env: File = File.new()
 	if not dot_env.file_exists(FILE_PATH):
-		push_error(UNEXISTING_FILE_ERROR)
+		prompt_message(prompt.unexisting_file_error, true)
 		return env_variables
 	
 	dot_env.open(FILE_PATH, File.READ)
@@ -44,14 +52,14 @@ func overwrite_dotenv() -> void:
 func create(variable_name: String, value: String, override: bool = false) -> void:
 	var dot_env: File = File.new()
 	if not dot_env.file_exists(FILE_PATH):
-		push_warning(CREATING_DOTENV_WARNING)
+		prompt_message(prompt.creating_dotenv_file)
 		dot_env.open(FILE_PATH, File.WRITE)
 		dot_env.store_string("%s=%s" % [variable_name, value])
 		dot_env.close()
 		
 	
 	if environment.has(variable_name) and not override:
-		push_warning(ALREADY_EXISTS_WARNING % variable_name)
+		prompt_message(prompt.already_exists % variable_name)
 		return
 	elif environment.has(variable_name) and override:
 		environment[variable_name] = value
