@@ -1,6 +1,6 @@
 GodotEnv
 ------------
-This addon was made for `.env` file consuming and creation. 📁
+This addon was made for `.env` file consuming and creation in Godot Engine. 📁
 
 ## Installation
 
