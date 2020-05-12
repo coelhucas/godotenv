@@ -15,7 +15,7 @@ After installation, the plugin will add `GodotEnv` as one of your autoload/singl
 The `.env` file must be at your root project directory. (i.e. `res://`)
 
 ### GodotEnv
------------
+
 GodotEnv creates a new dotenv file if there's any as soon as the project start.
 
 #### create_var(variable_name: String, value: String, overwrite: bool = false) -> void
