@@ -10,9 +10,10 @@ const ERROR_PREFIX: String = "GodotEnv: "
 
 # Possible warnings and errors to make it easier to re-use and add if needed
 var prompt: Dictionary = {
-	"unexisting_file_error": ".env file doesn't exists at %s." % FILE_PATH,
 	"creating_dotenv_file": ".env file doesn't exists. Creating one at %s..." % FILE_PATH,
-	"already_exists": "A variable called %s already exists, use argument override=true to override it."
+	"already_exists": "A variable called %s already exists, use argument override=true to override it.",
+	"need_dotenv": "You need a .env file to create or read an environment variable",
+	"creation_error": "Could not create .env file at %s."
 }
 
 # Every KEY=VALUE pair from .env will be parsed into this dictionary
@@ -32,7 +33,8 @@ func get_parsed_env() -> Dictionary:
 	var env_variables: Dictionary
 	var dot_env: File = File.new()
 	if not dot_env.file_exists(FILE_PATH):
-		prompt_message(prompt.unexisting_file_error, true)
+		prompt_message(prompt.creating_dotenv_file)
+		_create_dotenv()
 		return env_variables
 	
 	dot_env.open(FILE_PATH, File.READ)
@@ -55,14 +57,10 @@ func overwrite_dotenv() -> void:
 	dot_env.open(FILE_PATH, File.WRITE)
 	dot_env.store_string(new_content)
 
-func create(variable_name: String, value: String, overwrite: bool = false) -> void:
+func create_var(variable_name: String, value: String, overwrite: bool = false) -> void:
 	var dot_env: File = File.new()
 	if not dot_env.file_exists(FILE_PATH):
-#		Create a .env file to store the new variable if file doesn't already exists
-		prompt_message(prompt.creating_dotenv_file)
-		dot_env.open(FILE_PATH, File.WRITE)
-		dot_env.store_string("%s=%s" % [variable_name, value])
-		dot_env.close()
+		prompt_message(prompt.need_dotenv, true)
 		return
 		
 	if environment.has(variable_name) and not overwrite:
@@ -88,3 +86,12 @@ func get_var(variable_name: String) -> String:
 	
 	push_warning("%s not found into %s. Returning ' %s ' zero value." % [variable_name, FILE_PATH, "\"\""])
 	return ""
+	
+func _create_dotenv() -> void:
+	var dot_env: File = File.new()
+#	Creates the .env file. Pushes an error cause it already exists.
+	if not dot_env.file_exists(FILE_PATH):
+		dot_env.open(FILE_PATH, File.WRITE)
+		dot_env.close()
+	else:
+		prompt_message(prompt.creation_error % FILE_PATH)
