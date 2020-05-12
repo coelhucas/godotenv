@@ -10,7 +10,6 @@ const ERROR_PREFIX: String = "GodotEnv: "
 
 # Possible warnings and errors to make it easier to re-use and add if needed
 var prompt: Dictionary = {
-	"unexisting_file_error": ".env file doesn't exists at %s." % FILE_PATH,
 	"creating_dotenv_file": ".env file doesn't exists. Creating one at %s..." % FILE_PATH,
 	"already_exists": "A variable called %s already exists, use argument override=true to override it.",
 	"need_dotenv": "You need a .env file to create or read an environment variable",
