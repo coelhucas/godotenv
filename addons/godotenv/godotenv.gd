@@ -19,7 +19,7 @@ var prompt: Dictionary = {
 # Every KEY=VALUE pair from .env will be parsed into this dictionary
 var environment: Dictionary = {}
 
-func _ready() -> void:
+func _init() -> void:
 	environment = get_parsed_env()
 
 # Custom function to prompt error and warning messages
@@ -36,13 +36,15 @@ func get_parsed_env() -> Dictionary:
 		prompt_message(prompt.creating_dotenv_file)
 		_create_dotenv()
 		return env_variables
-	
+
 	dot_env.open(FILE_PATH, File.READ)
 	while !dot_env.eof_reached():
 		var line: String = dot_env.get_line()
+		if line == "":
+			continue
 		var env_var: Array = line.split("=")
 		env_variables[env_var[0]] = env_var[1]
-		
+
 	dot_env.close()
 	return env_variables
 
@@ -62,7 +64,7 @@ func create_var(variable_name: String, value: String, overwrite: bool = false) -
 	if not dot_env.file_exists(FILE_PATH):
 		prompt_message(prompt.need_dotenv, true)
 		return
-		
+
 	if environment.has(variable_name) and not overwrite:
 #		Prevent user from accidentally overwriting an env var
 		prompt_message(prompt.already_exists % variable_name)
@@ -72,7 +74,7 @@ func create_var(variable_name: String, value: String, overwrite: bool = false) -
 		environment[variable_name] = value
 		overwrite_dotenv()
 		return
-	
+
 	dot_env.open(FILE_PATH, File.READ_WRITE)
 	dot_env.seek_end()
 #	Append the new env var to the end of an existing .env file
@@ -83,10 +85,10 @@ func create_var(variable_name: String, value: String, overwrite: bool = false) -
 func get_var(variable_name: String) -> String:
 	if environment.has(variable_name):
 		return environment[variable_name]
-	
+
 	push_warning("%s not found into %s. Returning ' %s ' zero value." % [variable_name, FILE_PATH, "\"\""])
 	return ""
-	
+
 func _create_dotenv() -> void:
 	var dot_env: File = File.new()
 #	Creates the .env file. Pushes an error cause it already exists.
