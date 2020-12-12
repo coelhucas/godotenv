@@ -43,6 +43,11 @@ func get_parsed_env() -> Dictionary:
 		if line == "":
 			continue
 		var env_var: Array = line.split("=")
+		
+		# It's not a KEY=VALUE pair, skip it
+		if len(env_var) < 2:
+			continue
+		
 		env_variables[env_var[0]] = env_var[1]
 
 	dot_env.close()
